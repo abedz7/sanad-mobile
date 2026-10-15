@@ -76,18 +76,13 @@ against the hosted API above, or register your own account — either works.
 
 ## Screenshots
 
-_The four below predate this round's visual polish (logo sizing, password toggle, elevation,
-status accent, animated stepper) and onboarding/profile are not yet captured. Re-shoot all six
-against the hosted API and drop them in `docs/screenshots/` as `sign-in.png`, `onboarding.png`,
-`list.png`, `create.png`, `detail.png`, `profile.png`._
+| Sign in | My tickets |
+|---|---|
+| ![Sign in](docs/screenshots/sign-in.png) | ![My tickets](docs/screenshots/list.png) |
 
-| Sign in | Onboarding | My tickets |
-|---|---|---|
-| ![Sign in](docs/screenshots/sign-in.png) | _pending_ | ![My tickets](docs/screenshots/list.png) |
-
-| Create ticket | Ticket detail | Profile |
-|---|---|---|
-| ![Create ticket](docs/screenshots/create.png) | ![Ticket detail](docs/screenshots/detail.png) | _pending_ |
+| Create ticket | Ticket detail |
+|---|---|
+| ![Create ticket](docs/screenshots/create.png) | ![Ticket detail](docs/screenshots/detail.png) |
 
 ## Status
 
