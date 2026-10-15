@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     alignSelf: 'center',
-    height: 72,
+    height: 160,
     resizeMode: 'contain',
-    width: 72,
+    width: 160,
   },
   serverError: {
     backgroundColor: theme.dangerTint,

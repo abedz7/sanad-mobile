@@ -3,6 +3,7 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -66,6 +67,11 @@ export default function RegisterScreen() {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
+        <Image
+          accessibilityIgnoresInvertColors
+          source={require('../../assets/logo.png')}
+          style={styles.logo}
+        />
         <Text style={styles.title}>Create account</Text>
 
         <Controller
@@ -162,6 +168,12 @@ const styles = StyleSheet.create({
     color: theme.accent,
     fontSize: 15,
     fontWeight: '600',
+  },
+  logo: {
+    alignSelf: 'center',
+    height: 160,
+    resizeMode: 'contain',
+    width: 160,
   },
   serverError: {
     backgroundColor: theme.dangerTint,
