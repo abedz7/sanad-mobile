@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -16,7 +17,12 @@ import {
 } from 'react-native';
 import { z } from 'zod';
 
-import { uploadAttachment, useCreateTicket, type LocalFile } from '../../../src/api/tickets';
+import {
+  ticketKeys,
+  uploadAttachment,
+  useCreateTicket,
+  type LocalFile,
+} from '../../../src/api/tickets';
 import { Button } from '../../../src/components/Button';
 import { CategoryPicker } from '../../../src/components/CategoryPicker';
 import { PriorityPicker } from '../../../src/components/PriorityPicker';
@@ -48,6 +54,7 @@ interface PendingPhoto {
 
 export default function NewTicketScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const createTicket = useCreateTicket();
   const [category, setCategory] = useState<Category | null>(null);
   const [priority, setPriority] = useState<Priority>('medium');
@@ -137,6 +144,14 @@ export default function NewTicketScreen() {
   const finishSubmit = async (ticket: Ticket, list: PendingPhoto[]) => {
     const failures = await uploadPending(ticket.id, list);
     setBusy(false);
+    // The ticket in cache came from the create response (no attachments yet);
+    // the uploads just changed it server-side, so refetch before the detail
+    // screen reads it, or its Attachments section would show nothing.
+    if (list.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ticketKeys.detail(ticket.id) });
+      queryClient.invalidateQueries({ queryKey: ticketKeys.history(ticket.id) });
+      queryClient.invalidateQueries({ queryKey: ticketKeys.lists() });
+    }
     if (failures === 0) {
       router.replace(`/(app)/tickets/${ticket.id}`);
     } else {
