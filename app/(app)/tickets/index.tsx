@@ -1,26 +1,120 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
+import { useMyTickets } from '../../../src/api/tickets';
+import { EmptyState } from '../../../src/components/EmptyState';
+import { ErrorState } from '../../../src/components/ErrorState';
+import { TicketCardSkeleton } from '../../../src/components/Skeleton';
+import { TicketCard } from '../../../src/components/TicketCard';
 import { theme } from '../../../src/lib/theme';
 
-// Placeholder — the real list (loading/empty/error, pull-to-refresh, infinite
-// scroll) lands with the tickets API hooks.
 export default function TicketsScreen() {
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+  const {
+    data,
+    error,
+    isPending,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMyTickets();
+
+  const tickets = data?.pages.flatMap((page) => page.data) ?? [];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (isPending) {
+    return (
+      <View style={styles.skeletons}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <TicketCardSkeleton key={i} />
+        ))}
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <ErrorState error={error} onRetry={() => refetch()} />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>My tickets</Text>
-    </View>
+    <FlatList
+      contentContainerStyle={tickets.length === 0 ? styles.emptyContainer : styles.list}
+      data={tickets}
+      keyExtractor={(ticket) => ticket.id}
+      renderItem={({ item }) => <TicketCard ticket={item} />}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      refreshControl={
+        <RefreshControl
+          colors={[theme.accent]}
+          tintColor={theme.accent}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
+      onEndReached={() => {
+        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+      }}
+      onEndReachedThreshold={0.5}
+      ListEmptyComponent={
+        <EmptyState
+          title="No tickets yet"
+          message="Create your first one and we’ll keep you posted here."
+          actionLabel="Create ticket"
+          onAction={() => router.push('/(app)/tickets/new')}
+        />
+      }
+      ListFooterComponent={
+        isFetchingNextPage ? (
+          <ActivityIndicator color={theme.accent} style={styles.footer} />
+        ) : null
+      }
+      style={styles.screen}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    backgroundColor: theme.background,
+  center: {
+    backgroundColor: theme.surface,
     flex: 1,
     justifyContent: 'center',
   },
-  text: {
-    color: theme.textMuted,
-    fontSize: 16,
+  emptyContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  footer: {
+    paddingVertical: 16,
+  },
+  list: {
+    padding: 16,
+  },
+  screen: {
+    backgroundColor: theme.surface,
+  },
+  separator: {
+    height: 10,
+  },
+  skeletons: {
+    backgroundColor: theme.surface,
+    flex: 1,
+    gap: 10,
+    padding: 16,
   },
 });
