@@ -45,6 +45,7 @@ function RootNavigator() {
   // through the authenticated API and trust nothing in the URL.
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
       <Stack.Protected guard={status === 'signedIn'}>
         <Stack.Screen name="(app)" />
       </Stack.Protected>
