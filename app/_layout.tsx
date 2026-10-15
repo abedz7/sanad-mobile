@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef } from 'react';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 
 import { ApiRequestError } from '../src/api/client';
@@ -36,8 +38,34 @@ function Splash() {
   );
 }
 
+/**
+ * Carries a ticket deep link (sanad://tickets/<id>) through the sign-in gate:
+ * the protected (app) group drops links that arrive while signed out, so the
+ * id — and only a well-formed id — is parked and replayed after sign-in. The
+ * detail screen re-validates and fetches through the authenticated API.
+ */
+function usePendingTicketLink(status: ReturnType<typeof useAuth>['status']) {
+  const router = useRouter();
+  const url = Linking.useURL();
+  const pendingId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!url || status !== 'signedOut') return;
+    const match = /^\/?tickets\/([0-9a-f]{24})$/.exec(Linking.parse(url).path ?? '');
+    if (match) pendingId.current = match[1];
+  }, [url, status]);
+
+  useEffect(() => {
+    if (status !== 'signedIn' || !pendingId.current) return;
+    const id = pendingId.current;
+    pendingId.current = null;
+    router.replace(`/(app)/tickets/${id}`);
+  }, [status, router]);
+}
+
 function RootNavigator() {
   const { status } = useAuth();
+  usePendingTicketLink(status);
 
   if (status === 'loading') return <Splash />;
 
