@@ -12,6 +12,8 @@ export default function TicketsLayout() {
         // Soft brand band behind the list/detail headers.
         headerStyle: { backgroundColor: theme.accentTint },
         headerShadowVisible: false,
+        // Chevron only — "< My tickets" as a label crowded the detail header.
+        headerBackButtonDisplayMode: 'minimal',
       }}
     >
       <Stack.Screen
