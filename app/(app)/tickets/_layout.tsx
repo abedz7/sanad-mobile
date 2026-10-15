@@ -23,6 +23,7 @@ export default function TicketsLayout() {
         }}
       />
       <Stack.Screen name="new" options={{ title: 'New ticket', presentation: 'modal' }} />
+      <Stack.Screen name="[id]" options={{ title: 'Ticket' }} />
     </Stack>
   );
 }

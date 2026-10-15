@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Badge } from './Badge';
 import { theme } from '../lib/theme';
@@ -15,9 +15,19 @@ function formatActivity(iso: string): string {
   });
 }
 
-export function TicketCard({ ticket }: { ticket: TicketListItem }) {
+export function TicketCard({
+  ticket,
+  onPress,
+}: {
+  ticket: TicketListItem;
+  onPress?: () => void;
+}) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && !!onPress && styles.cardPressed]}
+    >
       <Text numberOfLines={2} style={styles.title}>
         {ticket.title}
       </Text>
@@ -35,7 +45,7 @@ export function TicketCard({ ticket }: { ticket: TicketListItem }) {
           {formatActivity(ticket.lastActivityAt)}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -51,6 +61,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 8,
     padding: 14,
+  },
+  cardPressed: {
+    backgroundColor: theme.surface,
   },
   meta: {
     color: theme.textMuted,

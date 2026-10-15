@@ -57,7 +57,12 @@ export default function TicketsScreen() {
       contentContainerStyle={tickets.length === 0 ? styles.emptyContainer : styles.list}
       data={tickets}
       keyExtractor={(ticket) => ticket.id}
-      renderItem={({ item }) => <TicketCard ticket={item} />}
+      renderItem={({ item }) => (
+        <TicketCard
+          onPress={() => router.push(`/(app)/tickets/${item.id}`)}
+          ticket={item}
+        />
+      )}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       refreshControl={
         <RefreshControl
