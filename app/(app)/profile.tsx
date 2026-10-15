@@ -2,11 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 import { useAuth } from '../../src/auth/AuthProvider';
 import { Button } from '../../src/components/Button';
+import { Sheet } from '../../src/components/Sheet';
 import { TextField } from '../../src/components/TextField';
 import { showToast } from '../../src/components/Toast';
 import { errorMessage } from '../../src/lib/errors';
@@ -122,34 +123,31 @@ function EditNameSheet({ visible, onClose }: { visible: boolean; onClose: () => 
   });
 
   return (
-    <Modal animationType="slide" onRequestClose={close} transparent visible={visible}>
-      <Pressable accessibilityLabel="Close" onPress={close} style={styles.backdrop} />
-      <View style={styles.sheet}>
-        <Text style={styles.cardTitle}>Edit personal details</Text>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              autoComplete="name"
-              error={errors.name?.message}
-              label="Name"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              textContentType="name"
-              value={value}
-            />
-          )}
-        />
-        <TextField
-          editable={false}
-          hint="Email can’t be changed"
-          label="Email"
-          value={user?.email ?? ''}
-        />
-        <Button loading={isSubmitting} onPress={onSave} title="Save" />
-      </View>
-    </Modal>
+    <Sheet onClose={close} visible={visible}>
+      <Text style={styles.cardTitle}>Edit personal details</Text>
+      <Controller
+        control={control}
+        name="name"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            autoComplete="name"
+            error={errors.name?.message}
+            label="Name"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            textContentType="name"
+            value={value}
+          />
+        )}
+      />
+      <TextField
+        editable={false}
+        hint="Email can’t be changed"
+        label="Email"
+        value={user?.email ?? ''}
+      />
+      <Button loading={isSubmitting} onPress={onSave} title="Save" />
+    </Sheet>
   );
 }
 
@@ -169,10 +167,6 @@ const styles = StyleSheet.create({
     color: theme.accent,
     fontSize: 30,
     fontWeight: '700',
-  },
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    flex: 1,
   },
   card: {
     backgroundColor: theme.surface,
@@ -217,14 +211,6 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: 15,
     fontWeight: '500',
-  },
-  sheet: {
-    backgroundColor: theme.background,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    gap: 14,
-    padding: 16,
-    paddingBottom: 32,
   },
   signOut: {
     marginTop: 'auto',
