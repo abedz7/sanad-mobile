@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../lib/theme';
 
@@ -20,25 +21,36 @@ export function Button({
   const base = variant === 'primary' ? theme.accent : theme.danger;
   const pressed = variant === 'primary' ? theme.accentShade : '#7f1d1d';
   const isDisabled = disabled || loading;
+  const [scale] = useState(() => new Animated.Value(1));
+
+  const pressTo = (toValue: number) => {
+    Animated.timing(scale, { toValue, duration: 100, useNativeDriver: true }).start();
+  };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled, busy: loading }}
-      disabled={isDisabled}
-      onPress={onPress}
-      style={({ pressed: isPressed }) => [
-        styles.button,
-        { backgroundColor: isPressed ? pressed : base },
-        isDisabled && styles.disabled,
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator color="#ffffff" />
-      ) : (
-        <Text style={styles.label}>{title}</Text>
-      )}
-    </Pressable>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
+        disabled={isDisabled}
+        onPress={onPress}
+        onPressIn={() => pressTo(0.98)}
+        onPressOut={() => pressTo(1)}
+        style={({ pressed: isPressed }) => [
+          styles.button,
+          { backgroundColor: isPressed ? pressed : base },
+          isDisabled && styles.disabled,
+        ]}
+      >
+        {/* The label always lays out so the button keeps its width while loading. */}
+        <Text style={[styles.label, loading && styles.labelHidden]}>{title}</Text>
+        {loading ? (
+          <View style={styles.spinner}>
+            <ActivityIndicator color="#ffffff" />
+          </View>
+        ) : null}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -58,5 +70,17 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  labelHidden: {
+    opacity: 0,
+  },
+  spinner: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
 });

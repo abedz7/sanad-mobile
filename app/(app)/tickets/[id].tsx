@@ -439,23 +439,12 @@ function Composer({ ticket }: { ticket: Ticket }) {
         style={styles.composerInput}
         value={body}
       />
-      <Pressable
-        accessibilityLabel="Send comment"
-        accessibilityRole="button"
-        disabled={addComment.isPending || body.trim().length === 0}
+      <Button
+        disabled={body.trim().length === 0}
+        loading={addComment.isPending}
         onPress={send}
-        style={({ pressed }) => [
-          styles.sendButton,
-          pressed && styles.sendButtonPressed,
-          (addComment.isPending || body.trim().length === 0) && styles.sendButtonDisabled,
-        ]}
-      >
-        {addComment.isPending ? (
-          <ActivityIndicator color="#ffffff" size="small" />
-        ) : (
-          <Ionicons color="#ffffff" name="arrow-up" size={20} />
-        )}
-      </Pressable>
+        title="Send"
+      />
     </View>
   );
 }
@@ -579,20 +568,6 @@ const styles = StyleSheet.create({
     color: theme.text,
     fontSize: 16,
     fontWeight: '600',
-  },
-  sendButton: {
-    alignItems: 'center',
-    backgroundColor: theme.accent,
-    borderRadius: 20,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  sendButtonDisabled: {
-    opacity: 0.4,
-  },
-  sendButtonPressed: {
-    backgroundColor: theme.accentShade,
   },
   separator: {
     height: 10,
