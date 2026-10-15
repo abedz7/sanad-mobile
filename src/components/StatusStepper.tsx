@@ -1,12 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_LABELS } from '../lib/labels';
 import { theme } from '../lib/theme';
+import { useReducedMotion } from '../lib/useReducedMotion';
 import type { Status } from '../types/api';
 
 const STEPS: Status[] = ['open', 'in_progress', 'resolved', 'closed'];
+const DOT = 12;
 
-/** Open → In Progress → Resolved → Closed with the current step highlighted. */
+/** Open → In Progress → Resolved → Closed; the current step scales/colours in. */
 export function StatusStepper({ status }: { status: Status }) {
   const currentIndex = STEPS.indexOf(status);
 
@@ -20,13 +23,7 @@ export function StatusStepper({ status }: { status: Status }) {
             {index > 0 ? (
               <View style={[styles.connector, reached && styles.connectorReached]} />
             ) : null}
-            <View
-              style={[
-                styles.dot,
-                reached && styles.dotReached,
-                isCurrent && styles.dotCurrent,
-              ]}
-            />
+            <Dot reached={reached} isCurrent={isCurrent} />
             <Text
               numberOfLines={1}
               style={[styles.label, isCurrent && styles.labelCurrent]}
@@ -40,7 +37,29 @@ export function StatusStepper({ status }: { status: Status }) {
   );
 }
 
-const DOT = 12;
+function Dot({ reached, isCurrent }: { reached: boolean; isCurrent: boolean }) {
+  const reducedMotion = useReducedMotion();
+  const [scale] = useState(() => new Animated.Value(isCurrent ? 1.5 : 1));
+
+  useEffect(() => {
+    Animated.timing(scale, {
+      toValue: isCurrent ? 1.5 : 1,
+      duration: reducedMotion ? 0 : 200,
+      useNativeDriver: true,
+    }).start();
+  }, [isCurrent, scale, reducedMotion]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.dot,
+        reached && styles.dotReached,
+        isCurrent && styles.dotCurrentBorder,
+        { transform: [{ scale }] },
+      ]}
+    />
+  );
+}
 
 const styles = StyleSheet.create({
   connector: {
@@ -65,12 +84,9 @@ const styles = StyleSheet.create({
     width: DOT,
     zIndex: 1,
   },
-  dotCurrent: {
+  dotCurrentBorder: {
     borderColor: theme.accentTint,
-    borderWidth: 3,
-    height: DOT + 6,
-    marginTop: -3,
-    width: DOT + 6,
+    borderWidth: 2,
   },
   dotReached: {
     backgroundColor: theme.accent,

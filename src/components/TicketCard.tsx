@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Badge } from './Badge';
-import { theme } from '../lib/theme';
+import { STATUS_LABELS } from '../lib/labels';
+import { elevation, theme } from '../lib/theme';
 import type { TicketListItem } from '../types/api';
 
 function formatActivity(iso: string): string {
@@ -26,7 +27,11 @@ export function TicketCard({
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && !!onPress && styles.cardPressed]}
+      style={({ pressed }) => [
+        styles.card,
+        { borderLeftColor: STATUS_LABELS[ticket.status].color },
+        pressed && !!onPress && styles.cardPressed,
+      ]}
     >
       <Text numberOfLines={2} style={styles.title}>
         {ticket.title}
@@ -55,8 +60,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   card: {
+    ...elevation,
     backgroundColor: theme.background,
     borderColor: theme.border,
+    borderLeftWidth: 4,
     borderRadius: 12,
     borderWidth: 1,
     gap: 8,
@@ -64,6 +71,7 @@ const styles = StyleSheet.create({
   },
   cardPressed: {
     backgroundColor: theme.surface,
+    transform: [{ scale: 0.98 }],
   },
   meta: {
     color: theme.textMuted,

@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'r
 import { useMyTickets } from '../../../src/api/tickets';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { ErrorState } from '../../../src/components/ErrorState';
+import { FadeIn } from '../../../src/components/FadeIn';
 import { TicketCardSkeleton } from '../../../src/components/Skeleton';
 import { TicketCard } from '../../../src/components/TicketCard';
 import { theme } from '../../../src/lib/theme';
@@ -53,44 +54,47 @@ export default function TicketsScreen() {
   }
 
   return (
-    <FlatList
-      contentContainerStyle={tickets.length === 0 ? styles.emptyContainer : styles.list}
-      data={tickets}
-      keyExtractor={(ticket) => ticket.id}
-      renderItem={({ item }) => (
-        <TicketCard
-          onPress={() => router.push(`/(app)/tickets/${item.id}`)}
-          ticket={item}
-        />
-      )}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      refreshControl={
-        <RefreshControl
-          colors={[theme.accent]}
-          tintColor={theme.accent}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      }
-      onEndReached={() => {
-        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-      }}
-      onEndReachedThreshold={0.5}
-      ListEmptyComponent={
-        <EmptyState
-          title="No tickets yet"
-          message="Create your first one and we’ll keep you posted here."
-          actionLabel="Create ticket"
-          onAction={() => router.push('/(app)/tickets/new')}
-        />
-      }
-      ListFooterComponent={
-        isFetchingNextPage ? (
-          <ActivityIndicator color={theme.accent} style={styles.footer} />
-        ) : null
-      }
-      style={styles.screen}
-    />
+    <FadeIn>
+      <FlatList
+        contentContainerStyle={tickets.length === 0 ? styles.emptyContainer : styles.list}
+        data={tickets}
+        keyExtractor={(ticket) => ticket.id}
+        renderItem={({ item }) => (
+          <TicketCard
+            onPress={() => router.push(`/(app)/tickets/${item.id}`)}
+            ticket={item}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        refreshControl={
+          <RefreshControl
+            colors={[theme.accent]}
+            tintColor={theme.accent}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+        }}
+        onEndReachedThreshold={0.5}
+        ListEmptyComponent={
+          <EmptyState
+            icon="ticket-outline"
+            title="No tickets yet"
+            message="Create your first one and we’ll keep you posted here."
+            actionLabel="Create ticket"
+            onAction={() => router.push('/(app)/tickets/new')}
+          />
+        }
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <ActivityIndicator color={theme.accent} style={styles.footer} />
+          ) : null
+        }
+        style={styles.screen}
+      />
+    </FadeIn>
   );
 }
 

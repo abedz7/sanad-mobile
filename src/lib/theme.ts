@@ -18,3 +18,15 @@ export const theme = {
   danger: '#b91c1c',
   dangerTint: '#fee2e2',
 } as const;
+
+/**
+ * Soft card elevation. iOS draws the shadow*, Android the elevation; spread
+ * into a style next to a solid backgroundColor or Android clips it.
+ */
+export const elevation = {
+  elevation: 2,
+  shadowColor: '#0f172a',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.07,
+  shadowRadius: 8,
+} as const;

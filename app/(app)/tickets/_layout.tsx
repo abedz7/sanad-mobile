@@ -10,6 +10,9 @@ export default function TicketsLayout() {
       screenOptions={{
         headerTintColor: theme.accent,
         headerTitleStyle: { color: theme.text },
+        // Soft brand band behind the list/detail headers.
+        headerStyle: { backgroundColor: theme.accentTint },
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen

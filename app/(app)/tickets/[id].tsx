@@ -35,6 +35,7 @@ import { Button } from '../../../src/components/Button';
 import { CommentRow } from '../../../src/components/CommentRow';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { ErrorState } from '../../../src/components/ErrorState';
+import { FadeIn } from '../../../src/components/FadeIn';
 import { CommentRowSkeleton, TicketDetailSkeleton } from '../../../src/components/Skeleton';
 import { StatusStepper } from '../../../src/components/StatusStepper';
 import { showToast } from '../../../src/components/Toast';
@@ -63,6 +64,7 @@ function NotFound() {
     <View style={styles.centered}>
       <EmptyState
         actionLabel="Back to my tickets"
+        icon="alert-circle-outline"
         message="It may have been removed, or the link is wrong."
         onAction={() => router.replace('/(app)/tickets')}
         title="This ticket is not available"
@@ -120,42 +122,44 @@ function TicketDetail({ id }: { id: string }) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       style={styles.flex}
     >
-      <FlatList
-        contentContainerStyle={styles.list}
-        data={comments}
-        keyExtractor={(comment) => comment.id}
-        renderItem={({ item }) => <CommentRow comment={item} />}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListHeaderComponent={
-          <TicketHeader
-            commentsEmpty={comments.length === 0 && !commentsQuery.isPending}
-            history={historyQuery.data}
-            ticket={ticket}
-          />
-        }
-        ListFooterComponent={
-          commentsQuery.isFetchingNextPage ? (
-            <View style={styles.footer}>
-              <CommentRowSkeleton />
-            </View>
-          ) : null
-        }
-        onEndReached={() => {
-          if (commentsQuery.hasNextPage && !commentsQuery.isFetchingNextPage) {
-            commentsQuery.fetchNextPage();
+      <FadeIn>
+        <FlatList
+          contentContainerStyle={styles.list}
+          data={comments}
+          keyExtractor={(comment) => comment.id}
+          renderItem={({ item }) => <CommentRow comment={item} />}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListHeaderComponent={
+            <TicketHeader
+              commentsEmpty={comments.length === 0 && !commentsQuery.isPending}
+              history={historyQuery.data}
+              ticket={ticket}
+            />
           }
-        }}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            colors={[theme.accent]}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            tintColor={theme.accent}
-          />
-        }
-        style={styles.screen}
-      />
+          ListFooterComponent={
+            commentsQuery.isFetchingNextPage ? (
+              <View style={styles.footer}>
+                <CommentRowSkeleton />
+              </View>
+            ) : null
+          }
+          onEndReached={() => {
+            if (commentsQuery.hasNextPage && !commentsQuery.isFetchingNextPage) {
+              commentsQuery.fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              colors={[theme.accent]}
+              onRefresh={onRefresh}
+              refreshing={refreshing}
+              tintColor={theme.accent}
+            />
+          }
+          style={styles.screen}
+        />
+      </FadeIn>
       <Composer ticket={ticket} />
     </KeyboardAvoidingView>
   );
