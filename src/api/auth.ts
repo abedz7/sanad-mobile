@@ -1,4 +1,7 @@
+import axios from 'axios';
+
 import { api } from './client';
+import { API_URL } from '../lib/env';
 import type { ApiSuccess, AuthSession, User } from '../types/api';
 
 export async function login(email: string, password: string): Promise<AuthSession> {
@@ -28,7 +31,12 @@ export async function me(): Promise<User> {
   return response.data.data;
 }
 
-/** Idempotent on the server: an unknown or revoked token still returns 204. */
+/**
+ * Idempotent on the server: an unknown or revoked token still returns 204.
+ * Authenticated by the refresh token in the body (contract 1.1.0), so this is
+ * a bare request — no Authorization header, and it must work with an expired
+ * access token.
+ */
 export async function logout(refreshToken: string): Promise<void> {
-  await api.post('/auth/logout', { refreshToken });
+  await axios.post(`${API_URL}/api/v1/auth/logout`, { refreshToken }, { timeout: 15_000 });
 }

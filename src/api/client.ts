@@ -141,13 +141,18 @@ interface RetriableConfig extends AxiosRequestConfig {
   _retried?: boolean;
 }
 
+// Routes where a 401 is a definitive verdict on the credentials in the request
+// body (or the refresh token itself) — refreshing the access token cannot help.
+// /auth/me is NOT here: it authenticates by access token like any other route.
+const NO_REFRESH_ROUTES = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const config = error.config as RetriableConfig | undefined;
-    const isAuthRoute = config?.url?.startsWith('/auth/') ?? false;
+    const isTokenFlowRoute = NO_REFRESH_ROUTES.some((route) => config?.url === route);
 
-    if (error.response?.status === 401 && config && !config._retried && !isAuthRoute) {
+    if (error.response?.status === 401 && config && !config._retried && !isTokenFlowRoute) {
       config._retried = true;
       const refreshed = await refreshSession();
       if (refreshed) {
