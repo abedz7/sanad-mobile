@@ -72,7 +72,7 @@ export default function ProfileScreen() {
       <View style={styles.signOut}>
         <Button
           title="Sign out"
-          variant="secondary"
+          variant="destructive"
           onPress={onSignOut}
           loading={signingOut}
         />

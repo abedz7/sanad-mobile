@@ -8,12 +8,11 @@ interface ButtonProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'destructive';
+  variant?: 'primary' | 'destructive';
 }
 
 const VARIANTS = {
   primary: { base: theme.accent, pressed: theme.accentShade, label: '#ffffff' },
-  secondary: { base: theme.surface, pressed: theme.border, label: theme.text },
   destructive: { base: theme.danger, pressed: '#7f1d1d', label: '#ffffff' },
 } as const;
 
@@ -44,7 +43,6 @@ export function Button({
         style={({ pressed: isPressed }) => [
           styles.button,
           { backgroundColor: isPressed ? pressed : base },
-          variant === 'secondary' && styles.secondaryBorder,
           isDisabled && styles.disabled,
         ]}
       >
@@ -77,10 +75,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  secondaryBorder: {
-    borderColor: theme.border,
-    borderWidth: 1,
   },
   labelHidden: {
     opacity: 0,
