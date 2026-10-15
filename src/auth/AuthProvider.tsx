@@ -22,6 +22,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updateName: (name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -108,9 +109,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
+  // Optimistic: the new name shows immediately, and is rolled back on failure.
+  const updateName = useCallback(
+    async (name: string) => {
+      const previous = user;
+      if (previous) setUser({ ...previous, name });
+      try {
+        setUser(await authApi.updateMe(name));
+      } catch (error) {
+        setUser(previous);
+        throw error;
+      }
+    },
+    [user],
+  );
+
   const value = useMemo(
-    () => ({ user, status, signIn, register, signOut }),
-    [user, status, signIn, register, signOut],
+    () => ({ user, status, signIn, register, signOut, updateName }),
+    [user, status, signIn, register, signOut, updateName],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

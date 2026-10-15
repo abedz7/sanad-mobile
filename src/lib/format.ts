@@ -12,6 +12,16 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+export function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 export function formatRelative(iso: string): string {
   const time = Date.parse(iso);
   if (!Number.isFinite(time)) return '';

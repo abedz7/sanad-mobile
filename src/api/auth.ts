@@ -31,6 +31,12 @@ export async function me(): Promise<User> {
   return response.data.data;
 }
 
+/** Contract 1.3.0: only the display name is editable; email is the login identity. */
+export async function updateMe(name: string): Promise<User> {
+  const response = await api.patch<ApiSuccess<User>>('/auth/me', { name });
+  return response.data.data;
+}
+
 /**
  * Idempotent on the server: an unknown or revoked token still returns 204.
  * Authenticated by the refresh token in the body (contract 1.1.0), so this is

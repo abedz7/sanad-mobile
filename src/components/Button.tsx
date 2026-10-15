@@ -8,8 +8,14 @@ interface ButtonProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'destructive';
 }
+
+const VARIANTS = {
+  primary: { base: theme.accent, pressed: theme.accentShade, label: '#ffffff' },
+  secondary: { base: theme.surface, pressed: theme.border, label: theme.text },
+  destructive: { base: theme.danger, pressed: '#7f1d1d', label: '#ffffff' },
+} as const;
 
 export function Button({
   title,
@@ -18,8 +24,7 @@ export function Button({
   loading = false,
   variant = 'primary',
 }: ButtonProps) {
-  const base = variant === 'primary' ? theme.accent : theme.danger;
-  const pressed = variant === 'primary' ? theme.accentShade : '#7f1d1d';
+  const { base, pressed, label } = VARIANTS[variant];
   const isDisabled = disabled || loading;
   const [scale] = useState(() => new Animated.Value(1));
 
@@ -39,14 +44,17 @@ export function Button({
         style={({ pressed: isPressed }) => [
           styles.button,
           { backgroundColor: isPressed ? pressed : base },
+          variant === 'secondary' && styles.secondaryBorder,
           isDisabled && styles.disabled,
         ]}
       >
         {/* The label always lays out so the button keeps its width while loading. */}
-        <Text style={[styles.label, loading && styles.labelHidden]}>{title}</Text>
+        <Text style={[styles.label, { color: label }, loading && styles.labelHidden]}>
+          {title}
+        </Text>
         {loading ? (
           <View style={styles.spinner}>
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={label} />
           </View>
         ) : null}
       </Pressable>
@@ -67,9 +75,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  secondaryBorder: {
+    borderColor: theme.border,
+    borderWidth: 1,
   },
   labelHidden: {
     opacity: 0,
