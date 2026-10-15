@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ReactNode } from 'react';
 
+import { Sheet } from './Sheet';
 import { theme } from '../lib/theme';
 
 interface OptionModalProps {
@@ -14,18 +15,15 @@ interface OptionModalProps {
 /** Bottom-sheet-style modal shared by the category and priority pickers. */
 export function OptionModal({ visible, title, onClose, children }: OptionModalProps) {
   return (
-    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={styles.backdrop} />
-      <View style={styles.sheet}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          <Pressable accessibilityLabel="Close" accessibilityRole="button" onPress={onClose}>
-            <Ionicons color={theme.textMuted} name="close" size={24} />
-          </Pressable>
-        </View>
-        {children}
+    <Sheet onClose={onClose} visible={visible}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{title}</Text>
+        <Pressable accessibilityLabel="Close" accessibilityRole="button" onPress={onClose}>
+          <Ionicons color={theme.textMuted} name="close" size={24} />
+        </Pressable>
       </View>
-    </Modal>
+      {children}
+    </Sheet>
   );
 }
 
@@ -62,15 +60,10 @@ export function OptionRow({ label, description, selected, onPress }: OptionRowPr
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    flex: 1,
-  },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
   },
   row: {
     alignItems: 'center',
@@ -102,14 +95,6 @@ const styles = StyleSheet.create({
   rowText: {
     flexShrink: 1,
     gap: 2,
-  },
-  sheet: {
-    backgroundColor: theme.background,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: '70%',
-    padding: 16,
-    paddingBottom: 32,
   },
   title: {
     color: theme.text,
