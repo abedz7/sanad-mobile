@@ -213,6 +213,10 @@ export async function uploadAttachment(
     `/tickets/${ticketId}/attachments`,
     form,
     {
+      // Clear the instance's default application/json so the runtime sets
+      // multipart/form-data with the boundary; otherwise the server sees a
+      // JSON-labelled body, finds no file, and rejects the upload.
+      headers: { 'Content-Type': undefined },
       onUploadProgress: (event) => {
         if (onProgress && event.total) onProgress(event.loaded / event.total);
       },
