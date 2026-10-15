@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   hero: {
-    backgroundColor: theme.accentTint,
     gap: 4,
     paddingBottom: 20,
     paddingHorizontal: 20,
