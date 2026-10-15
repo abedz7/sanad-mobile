@@ -5,6 +5,7 @@ import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 
 import { ApiRequestError } from '../src/api/client';
 import { AuthProvider, useAuth } from '../src/auth/AuthProvider';
+import { ToastHost } from '../src/components/Toast';
 import { theme } from '../src/lib/theme';
 
 const queryClient = new QueryClient({
@@ -62,6 +63,7 @@ export default function RootLayout() {
       <AuthProvider>
         <StatusBar style="dark" />
         <RootNavigator />
+        <ToastHost />
       </AuthProvider>
     </QueryClientProvider>
   );
