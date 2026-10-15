@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   KeyboardAvoidingView,
@@ -36,7 +35,7 @@ import { Button } from '../../../src/components/Button';
 import { CommentRow } from '../../../src/components/CommentRow';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { ErrorState } from '../../../src/components/ErrorState';
-import { TicketCardSkeleton } from '../../../src/components/Skeleton';
+import { CommentRowSkeleton, TicketDetailSkeleton } from '../../../src/components/Skeleton';
 import { StatusStepper } from '../../../src/components/StatusStepper';
 import { showToast } from '../../../src/components/Toast';
 import { errorMessage } from '../../../src/lib/errors';
@@ -94,8 +93,7 @@ function TicketDetail({ id }: { id: string }) {
   if (ticketQuery.isPending) {
     return (
       <View style={styles.skeletons}>
-        <TicketCardSkeleton />
-        <TicketCardSkeleton />
+        <TicketDetailSkeleton />
       </View>
     );
   }
@@ -137,7 +135,9 @@ function TicketDetail({ id }: { id: string }) {
         }
         ListFooterComponent={
           commentsQuery.isFetchingNextPage ? (
-            <ActivityIndicator color={theme.accent} style={styles.footer} />
+            <View style={styles.footer}>
+              <CommentRowSkeleton />
+            </View>
           ) : null
         }
         onEndReached={() => {

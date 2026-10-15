@@ -37,7 +37,7 @@ export default function TicketsScreen() {
   if (isPending) {
     return (
       <View style={styles.skeletons}>
-        {Array.from({ length: 5 }, (_, i) => (
+        {Array.from({ length: 3 }, (_, i) => (
           <TicketCardSkeleton key={i} />
         ))}
       </View>
