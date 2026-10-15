@@ -4,8 +4,9 @@ End-user mobile app for **Sanad**, a support-ticket / helpdesk system. Expo · R
 TypeScript · expo-router · TanStack Query.
 
 Built against the contract in [`docs/API.md`](docs/API.md) (a verbatim copy of
-`sanad-server/docs/API.md`; the server owns it). Requires a running `sanad-server`.
-Library and pattern choices are justified in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+`sanad-server/docs/API.md`; the server owns it). Runs against the hosted API out of the box — see
+[Try it without running the server](#try-it-without-running-the-server) — or against your own
+`sanad-server`. Library and pattern choices are justified in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Prerequisites
 
@@ -14,18 +15,35 @@ Library and pattern choices are justified in [`docs/DECISIONS.md`](docs/DECISION
   Simulator / Android Emulator
 - A running [`sanad-server`](../sanad-server) (defaults to port 4000)
 
-## Environment
+## Try it without running the server
+
+The fastest way to see the app: point it at the hosted `sanad-server` instead of running one
+locally.
 
 ```sh
 cp .env.example .env
 ```
 
-`EXPO_PUBLIC_API_URL` is the only variable. It must be reachable **from the device**:
+`.env.example` already defaults `EXPO_PUBLIC_API_URL` to the hosted API:
 
-- iOS Simulator / Android Emulator on the same machine: `http://localhost:4000` works
-  (Android emulator may need `http://10.0.2.2:4000`).
-- Physical phone with Expo Go: use your computer's LAN IP, e.g. `http://192.168.1.20:4000` —
-  `localhost` on the phone is the phone.
+```
+EXPO_PUBLIC_API_URL=https://sanad-server-production-8573.up.railway.app
+```
+
+Then skip straight to [Run](#run) below and sign in with the [demo account](#demo-account). No
+local server, no LAN IP juggling.
+
+## Environment
+
+`EXPO_PUBLIC_API_URL` is the only variable, and it is public — `EXPO_PUBLIC_*` vars are bundled
+into the app, so this is never a secret. It must be reachable **from the device**:
+
+- **Hosted API** (easiest): the Railway URL above works from any simulator or physical phone with
+  internet access.
+- **Local `sanad-server`**, iOS Simulator / Android Emulator on the same machine: `http://localhost:4000`
+  works (Android emulator may need `http://10.0.2.2:4000`).
+- **Local `sanad-server`**, physical phone with Expo Go: use your computer's LAN IP, e.g.
+  `http://192.168.1.20:4000` — `localhost` on the phone is the phone.
 
 The app fails fast with a readable error if the variable is missing. Never commit `.env`.
 
@@ -47,19 +65,33 @@ npx expo lint
 
 ## Demo account
 
-_Pending the server's seed script (Phase 2): the seeded demo email will be listed here; the
-password is given out-of-band. Until then, register any account in the app._
+Seeded on both the hosted API and a freshly-seeded local server (`npm run seed` in `sanad-server`):
+
+| | |
+|---|---|
+| Email | `demo@sanad.demo` |
+
+The password is given out-of-band (the seed script never prints or logs it). Sign in with it
+against the hosted API above, or register your own account — either works.
 
 ## Screenshots
 
-| Sign in | My tickets | Create ticket | Ticket detail |
-|---|---|---|---|
-| ![Sign in](docs/screenshots/sign-in.png) | _pending server tickets API_ | _pending server tickets API_ | _pending server tickets API_ |
+_The four below predate this round's visual polish (logo sizing, password toggle, elevation,
+status accent, animated stepper) and onboarding/profile are not yet captured. Re-shoot all six
+against the hosted API and drop them in `docs/screenshots/` as `sign-in.png`, `onboarding.png`,
+`list.png`, `create.png`, `detail.png`, `profile.png`._
+
+| Sign in | Onboarding | My tickets |
+|---|---|---|
+| ![Sign in](docs/screenshots/sign-in.png) | _pending_ | ![My tickets](docs/screenshots/list.png) |
+
+| Create ticket | Ticket detail | Profile |
+|---|---|---|
+| ![Create ticket](docs/screenshots/create.png) | ![Ticket detail](docs/screenshots/detail.png) | _pending_ |
 
 ## Status
 
-Phase 4b (client side) complete: create ticket with photos and resilient uploads, ticket detail
-with status stepper, attachments, comments and requester status actions, edit-while-open, and
-`sanad://tickets/<id>` deep links through the auth gate. Auth flows are verified against the live
-server; the ticket screens exercise the contract and light up when the server's ticket endpoints
-ship, after which the remaining screenshots and the demo account land here.
+Client complete end to end: onboarding, auth, ticket list/detail with status stepper, attachments,
+comments and requester status actions, edit-while-open, profile with editable name, and
+`sanad://tickets/<id>` deep links through the auth gate. Verified against both a local
+`sanad-server` and the hosted instance above.
