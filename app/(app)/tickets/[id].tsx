@@ -6,6 +6,7 @@ import {
   Alert,
   FlatList,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
@@ -15,15 +16,21 @@ import {
   View,
 } from 'react-native';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import {
   useAddComment,
   useChangeStatus,
   useTicket,
   useTicketComments,
   useTicketHistory,
+  useUpdateTicket,
 } from '../../../src/api/tickets';
 import { ApiRequestError } from '../../../src/api/client';
 import { AttachmentPreview } from '../../../src/components/AttachmentPreview';
+import { TextField } from '../../../src/components/TextField';
 import { Badge } from '../../../src/components/Badge';
 import { Button } from '../../../src/components/Button';
 import { CommentRow } from '../../../src/components/CommentRow';
@@ -167,7 +174,10 @@ function TicketHeader({
     <View style={styles.header}>
       <StatusStepper status={ticket.status} />
 
-      <Text style={styles.title}>{ticket.title}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{ticket.title}</Text>
+        {ticket.status === 'open' ? <EditTicketButton ticket={ticket} /> : null}
+      </View>
       <View style={styles.badges}>
         <Badge status={ticket.status} />
         <Badge priority={ticket.priority} />
@@ -252,6 +262,110 @@ function StatusActions({ ticket }: { ticket: Ticket }) {
         </View>
       ))}
     </View>
+  );
+}
+
+// Mirrors the contract's PATCH /tickets/:id body; allowed only while "open".
+const editSchema = z.object({
+  title: z.string().trim().min(3, 'At least 3 characters').max(120, 'At most 120 characters'),
+  description: z
+    .string()
+    .trim()
+    .min(1, 'Describe the problem')
+    .max(5000, 'At most 5000 characters'),
+});
+
+type EditValues = z.infer<typeof editSchema>;
+
+function EditTicketButton({ ticket }: { ticket: Ticket }) {
+  const [open, setOpen] = useState(false);
+  const updateTicket = useUpdateTicket(ticket.id);
+  const ticketQuery = useTicket(ticket.id);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<EditValues>({
+    resolver: zodResolver(editSchema),
+    defaultValues: { title: ticket.title, description: ticket.description },
+  });
+
+  const openModal = () => {
+    reset({ title: ticket.title, description: ticket.description });
+    setOpen(true);
+  };
+
+  const onSave = handleSubmit(async (values) => {
+    try {
+      await updateTicket.mutateAsync(values);
+      setOpen(false);
+    } catch (error) {
+      showToast(errorMessage(error));
+      if (error instanceof ApiRequestError && error.code === 'TICKET_NOT_EDITABLE') {
+        // Status moved on under us; resync so the Edit button disappears.
+        setOpen(false);
+        ticketQuery.refetch();
+      }
+    }
+  });
+
+  return (
+    <>
+      <Pressable
+        accessibilityLabel="Edit ticket"
+        accessibilityRole="button"
+        onPress={openModal}
+        style={styles.editButton}
+      >
+        <Ionicons color={theme.accent} name="pencil" size={18} />
+      </Pressable>
+      <Modal
+        animationType="slide"
+        onRequestClose={() => setOpen(false)}
+        transparent
+        visible={open}
+      >
+        <Pressable
+          accessibilityLabel="Close"
+          onPress={() => setOpen(false)}
+          style={styles.editBackdrop}
+        />
+        <View style={styles.editSheet}>
+          <Text style={styles.sectionTitle}>Edit ticket</Text>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextField
+                error={errors.title?.message}
+                label="Title"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextField
+                error={errors.description?.message}
+                label="Description"
+                multiline
+                numberOfLines={5}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                style={styles.editDescription}
+                value={value}
+              />
+            )}
+          />
+          <Button loading={isSubmitting} onPress={onSave} title="Save changes" />
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -414,6 +528,25 @@ const styles = StyleSheet.create({
     color: theme.textMuted,
     fontSize: 12,
   },
+  editBackdrop: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    flex: 1,
+  },
+  editButton: {
+    padding: 6,
+  },
+  editDescription: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  editSheet: {
+    backgroundColor: theme.background,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    gap: 14,
+    padding: 16,
+    paddingBottom: 32,
+  },
   description: {
     color: theme.text,
     fontSize: 15,
@@ -472,7 +605,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: theme.text,
+    flexShrink: 1,
     fontSize: 20,
     fontWeight: '700',
+  },
+  titleRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'space-between',
   },
 });
