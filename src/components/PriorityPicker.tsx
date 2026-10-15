@@ -27,7 +27,11 @@ export function PriorityPicker({ value, onChange }: PriorityPickerProps) {
         onPress={() => setOpen(true)}
         style={styles.field}
       >
-        <Badge priority={value} />
+        {/* Badge is alignSelf:flex-start for its flex-wrap usage elsewhere; wrap it
+            so this row's alignItems:center can still centre it vertically. */}
+        <View>
+          <Badge priority={value} />
+        </View>
         <Ionicons color={theme.textMuted} name="chevron-down" size={18} />
       </Pressable>
 
