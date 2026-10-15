@@ -89,7 +89,7 @@ export default function SignInScreen() {
               label="Password"
               autoCapitalize="none"
               autoComplete="current-password"
-              secureTextEntry
+              secureToggle
               textContentType="password"
               onBlur={onBlur}
               onChangeText={onChange}

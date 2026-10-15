@@ -114,7 +114,7 @@ export default function RegisterScreen() {
               label="Password"
               autoCapitalize="none"
               autoComplete="new-password"
-              secureTextEntry
+              secureToggle
               textContentType="newPassword"
               onBlur={onBlur}
               onChangeText={onChange}
