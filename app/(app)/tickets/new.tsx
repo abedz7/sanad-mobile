@@ -95,6 +95,10 @@ export default function NewTicketScreen() {
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       quality: 0.8,
+      // iOS returns the original HEIC from the multi-select picker; the server accepts only
+      // JPEG/PNG/WebP/PDF by magic bytes, so ask iOS to transcode to a compatible format (JPEG).
+      preferredAssetRepresentationMode:
+        ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
     });
     if (result.canceled) return;
     const picked = result.assets.slice(0, remaining).map((asset, index): PendingPhoto => {
