@@ -32,9 +32,23 @@ jewel; it belongs in the iOS Keychain / Android Keystore, which is exactly what 
 wraps. AsyncStorage is plaintext on disk and is not a dependency of this app at all — that is
 checked, not assumed — so no code path can drift into persisting tokens insecurely.
 
-**expo-image-picker.** The Expo-maintained picker for the Phase 4b attachment flow (camera roll,
-permission handling). Listed now because it is part of the fixed stack; it gains a fuller paragraph
-when the create-ticket screen ships.
+**expo-image-picker.** The Expo-maintained camera-roll picker for ticket attachments: multi-select
+capped at the contract's 5-attachment limit, images only (the server also accepts PDFs, but a photo
+picker is the right mobile scope), and built-in permission handling — a denial gets a message
+pointing at the Settings path instead of a dead button. Assets come back as `{uri, name, type}`
+descriptors that drop straight into React Native's multipart `FormData`.
+
+**@expo/vector-icons.** Ships inside every Expo template and is maintained by Expo; used for tab
+bar, pickers and small actions (add, close, send). Declared as a direct dependency rather than
+reached transitively so the lockfile owns its version. The alternative — bundling custom SVGs —
+adds an svg runtime dependency for icons that carry no brand meaning.
+
+**expo-file-system + expo-sharing.** Attachment bytes are only reachable through the authenticated
+download route, so files are fetched with the axios client (bearer header, `arraybuffer`) and
+written into the app's cache directory under a random name; `expo-sharing` then hands the local
+file to the OS share sheet. A raw API URL is never given to an `<Image>`, a browser or a viewer —
+that would leak the route structure and invite unauthenticated fetching, and the contract's
+`Cache-Control: private, no-store` makes clear the server never wants those bytes cached elsewhere.
 
 ## Patterns
 
@@ -58,6 +72,19 @@ query cache and route to sign-in — the interceptor stays free of any navigatio
 the contract's `code`/`message`/`details`/`requestId`. Screens switch on `code` (the stable part per
 the contract) to choose copy — e.g. the deliberately generic "Email or password is incorrect" for
 `AUTH_INVALID_CREDENTIALS` — and never render raw axios/network internals.
+
+**Sequential attachment uploads with a create-once guard.** Submitting a ticket first issues one
+`POST /tickets`, then uploads photos one at a time with per-file progress. Sequential beats parallel
+here: progress is legible, the 5 MB files don't compete for a phone's uplink, and the mutating-route
+rate limit (60/15 min per user) is respected. The created ticket id is pinned in state, so a partial
+failure ("ticket created, 1 of 3 photos failed") retries only the failed files — the ticket is never
+created twice.
+
+**Allowed transitions on the client are a UX hint only.** `allowedRequesterTransitions` mirrors the
+contract's requester column (§5), including the 7-day reopen window, purely to decide which buttons
+to render. Every tap still goes to the server, and a `409 TICKET_INVALID_TRANSITION` /
+`TICKET_CLOSED` answer is shown as a toast and triggers a refetch — the client can be stale (an
+admin moved the ticket meanwhile), the server is never wrong.
 
 **One label map.** Status and priority display names and colours live only in `src/lib/labels.ts`;
 every badge imports from there, so a renamed status is a one-line change. The brand accent

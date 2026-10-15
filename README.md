@@ -47,14 +47,19 @@ npx expo lint
 
 ## Demo account
 
-_To be added after server Phase 2 seeds demo data (email only — the password is given out-of-band)._
+_Pending the server's seed script (Phase 2): the seeded demo email will be listed here; the
+password is given out-of-band. Until then, register any account in the app._
 
 ## Screenshots
 
-_To be added once the ticket flows ship (Phase 4b)._
+| Sign in | My tickets | Create ticket | Ticket detail |
+|---|---|---|---|
+| ![Sign in](docs/screenshots/sign-in.png) | _pending server tickets API_ | _pending server tickets API_ | _pending server tickets API_ |
 
 ## Status
 
-Phase 4a: scaffold, secure session (sign-in / register / refresh / sign-out), app shell, and the
-My-tickets list (loading / empty / error, pull-to-refresh, infinite scroll). The list goes live when
-the server's ticket endpoints ship; create-ticket and ticket detail land in Phase 4b.
+Phase 4b (client side) complete: create ticket with photos and resilient uploads, ticket detail
+with status stepper, attachments, comments and requester status actions, edit-while-open, and
+`sanad://tickets/<id>` deep links through the auth gate. Auth flows are verified against the live
+server; the ticket screens exercise the contract and light up when the server's ticket endpoints
+ship, after which the remaining screenshots and the demo account land here.
