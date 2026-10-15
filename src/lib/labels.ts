@@ -26,3 +26,36 @@ export const PRIORITY_LABELS: Record<Priority, BadgeStyle> = {
   high: { label: 'High', color: '#c2410c', backgroundColor: '#ffedd5' },
   urgent: { label: 'Urgent', color: '#b91c1c', backgroundColor: '#fee2e2' },
 };
+
+export interface RequesterTransition {
+  to: Status;
+  label: string;
+}
+
+const REOPEN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Requester column of the contract's status machine (API.md §5), including the
+ * 7-day reopen window after close. A UX hint only — the server still decides.
+ */
+export function allowedRequesterTransitions(
+  status: Status,
+  closedAt: string | null,
+): RequesterTransition[] {
+  switch (status) {
+    case 'open':
+    case 'in_progress':
+      return [{ to: 'closed', label: 'Close ticket' }];
+    case 'resolved':
+      return [
+        { to: 'closed', label: 'Close ticket' },
+        { to: 'open', label: 'Reopen — not fixed' },
+      ];
+    case 'closed': {
+      const closedTime = closedAt ? Date.parse(closedAt) : NaN;
+      const withinWindow =
+        Number.isFinite(closedTime) && Date.now() - closedTime < REOPEN_WINDOW_MS;
+      return withinWindow ? [{ to: 'open', label: 'Reopen ticket' }] : [];
+    }
+  }
+}
